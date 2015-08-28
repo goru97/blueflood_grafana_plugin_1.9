@@ -10,7 +10,7 @@ define([
 
         var module = angular.module('grafana.services');
 
-        module.factory('BluefloodDatasource', function ($q, backendSrv, templateSrv) {
+        module.factory('BluefloodDatasource', function ($q, $http, templateSrv) {
 
             /**
              * Datasource initialization. Calls when you refresh page, add
@@ -20,6 +20,7 @@ define([
              */
             function BluefloodDatasource(datasource) {
                 this.name = datasource.name;
+                this.type = 'BluefloodDatasource';
                 this.url = datasource.url;
                 this.basicAuth = datasource.basicAuth;
                 this.withCredentials = datasource.withCredentials;
@@ -43,7 +44,7 @@ define([
                 options.url = this.url + options.url;
                 options.inspect = { type: 'graphite' };
 
-                return backendSrv.datasourceRequest(options);
+                return $http(options);
             };
 
             /////////////////
@@ -81,6 +82,7 @@ define([
                     return this.doAPIRequest({
                         method: 'GET',
                         url: '/events/getEvents?from=' +options.range.from.getTime()+ '&until=' + options.range.to.getTime() + tags,
+                    
                     });
                 }
                 catch (err) {
