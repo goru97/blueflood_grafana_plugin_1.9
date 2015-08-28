@@ -3,19 +3,19 @@
 Download latest 1.x.x release and unpack into <your grafana installation>/plugins/datasource/.
 Then edit Grafana config.js
 
-###Add dependencies###
+###Add dependencies###</br>
 
-plugins: {
-  panels: [],
-  dependencies: ['datasource/blueflood/datasource'],
-}
+plugins: { </br>
+  panels: [],</br>
+  dependencies: ['datasource/blueflood/datasource'],</br>
+}</br>
 
-###Add datasource and setup your Zabbix API url, username and password###
+###Add datasource and setup your Zabbix API url, username and password###</br>
 
-datasources: {
-  ...
-  blueflood: {
-    type: 'BluefloodDatasource',
-    url: 'http://staging.metrics.api.rackspacecloud.com'
-  }
-  },
+datasources: {</br>
+  ...</br>
+  blueflood: {</br>
+    type: 'BluefloodDatasource',</br>
+    url: 'http://staging.metrics.api.rackspacecloud.com'</br>
+  }</br>
+  },</br>
