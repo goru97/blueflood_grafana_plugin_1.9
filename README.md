@@ -3,14 +3,14 @@
 Download latest 1.x.x release and unpack into <your grafana installation>/plugins/datasource/.
 Then edit Grafana config.js
 
-###Add dependencies###</br>
+###Add dependencies</br>
 
 plugins: { </br>
   panels: [],</br>
   dependencies: ['datasource/blueflood/datasource'],</br>
 }</br>
 
-###Add datasource and setup your Zabbix API url, username and password###</br>
+###Add datasource and setup your Zabbix API url, username and password</br>
 
 datasources: {</br>
   ...</br>
