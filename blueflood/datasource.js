@@ -3,8 +3,7 @@ define([
         'angular',
         'lodash',
         'kbn',
-        'moment',
-        './bluefloodAPIWrapper'
+        'moment'
     ],
     function (angular, _) {
         //'use strict';
@@ -25,15 +24,11 @@ define([
                 this.basicAuth = datasource.basicAuth;
                 this.withCredentials = datasource.withCredentials;
 
-                // TODO: fix passing username and password from config.html
-                this.username = datasource.meta.username;
-                this.password = datasource.meta.password;
+                this.partials = datasource.partials || 'plugins/datasource/blueflood/partials';
+                this.annotationEditorSrc = this.partials + '/annotations.editor.html';
 
-                // Limit metrics per panel for templated request
-                this.limitmetrics = datasource.meta.limitmetrics || 100;
-
-                // Initialize Blueflood API
-                //this.bluefloodAPI = new BluefloodAPI(this.url, this.username, this.password, this.basicAuth, this.withCredentials);
+                this.supportMetrics   = false;
+                this.supportAnnotations = true;
             }
 
             BluefloodDatasource.prototype.doAPIRequest = function(options) {
