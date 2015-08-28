@@ -10,7 +10,7 @@ plugins: { </br>
   dependencies: ['datasource/blueflood/datasource'],</br>
 }</br>
 
-###Add datasource and setup your Zabbix API url, username and password</br>
+###Add datasource and setup your Blueflood url</br>
 
 datasources: {</br>
   ...</br>
