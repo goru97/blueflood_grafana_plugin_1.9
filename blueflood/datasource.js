@@ -72,7 +72,7 @@ define([
                     });
             };
 
-            BluefloodDatasource.prototype.events = function (options) {
+             BluefloodDatasource.prototype.events = function (options) {
                 try {
                     var tags = '';
                     if (options.tags) {
@@ -81,13 +81,16 @@ define([
 
                     return this.doAPIRequest({
                         method: 'GET',
-                        url: '/events/getEvents?from=' +options.range.from.getTime()+ '&until=' + options.range.to.getTime() + tags,
-                    
+                        url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
                     });
                 }
                 catch (err) {
                     return $q.reject(err);
                 }
+            };
+
+            BluefloodDatasource.prototype.translateTime = function(date) {
+              return kbn.parseDate(date).getTime();
             };
 
         return BluefloodDatasource;
