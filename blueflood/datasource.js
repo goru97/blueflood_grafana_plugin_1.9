@@ -42,7 +42,7 @@ define([
                 }
 
                 options.url = this.url + options.url;
-                options.inspect = { type: 'graphite' };
+                options.inspect = { type: 'blueflood' };
 
                 return $http(options);
             };
@@ -90,5 +90,6 @@ define([
                 }
             };
 
+        return BluefloodDatasource;
         });
     });
