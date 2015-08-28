@@ -62,7 +62,7 @@ define([
 
                             list.push({
                                 annotation: annotation,
-                                time: e.when * 1000,
+                                time: e.when,
                                 title: e.what,
                                 tags: e.tags,
                                 text: e.data
@@ -81,7 +81,7 @@ define([
 
                     return this.doAPIRequest({
                         method: 'GET',
-                        url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
+                        url: '/v2.0/836986/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
                     });
                 }
                 catch (err) {
