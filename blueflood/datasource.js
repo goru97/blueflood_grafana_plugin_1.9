@@ -3,7 +3,7 @@ define([
         'angular',
         'lodash',
         'kbn',
-        'moment'
+        './bluefloodReposeWrapper'
     ],
     function (angular, _, kbn) {
         //'use strict';
@@ -22,6 +22,7 @@ define([
                 this.name = datasource.name;
                 this.type = 'BluefloodDatasource';
                 this.url = datasource.url;
+                this.identityURL = "https://identity.api.rackspacecloud.com/v2.0/tokens";
                 this.basicAuth = datasource.basicAuth;
                 this.withCredentials = datasource.withCredentials;
 
@@ -30,9 +31,14 @@ define([
 
                 this.supportMetrics   = false;
                 this.supportAnnotations = true;
+
+                //Initialize Repose.
+                this.reposeAPI = new ReposeAPI(this.identityURL, "", "");
             }
 
             BluefloodDatasource.prototype.doAPIRequest = function(options) {
+                this.reposeAPI.performReposeAPIRequest();
+
                 if (this.basicAuth || this.withCredentials) {
                     options.withCredentials = true;
                 }
