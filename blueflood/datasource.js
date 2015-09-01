@@ -10,7 +10,7 @@ define([
 
         var module = angular.module('grafana.services');
 
-        module.factory('BluefloodDatasource', function ($q, $http, templateSrv) {
+        module.factory('BluefloodDatasource', function ($q, $http, templateSrv, ReposeAPI) {
 
             /**
              * Datasource initialization. Calls when you refresh page, add
@@ -19,12 +19,12 @@ define([
              * @param {Object} datasource Grafana datasource object.
              */
             function BluefloodDatasource(datasource) {
-                this.name = datasource.name;
-                this.type = 'BluefloodDatasource';
-                this.url = datasource.url;
-                this.identityURL = "https://identity.api.rackspacecloud.com/v2.0/tokens";
-                this.basicAuth = datasource.basicAuth;
-                this.withCredentials = datasource.withCredentials;
+                this.name             = datasource.name;
+                this.type             = 'BluefloodDatasource';
+                this.url              = datasource.url;
+                this.username         = datasource.username;
+                this.apikey           = datasource.apikey;
+                this.identityURL      = "https://identity.api.rackspacecloud.com/v2.0/tokens";
 
                 this.partials = datasource.partials || 'plugins/datasource/blueflood/partials';
                 this.annotationEditorSrc = this.partials + '/annotations.editor.html';
@@ -33,22 +33,18 @@ define([
                 this.supportAnnotations = true;
 
                 //Initialize Repose.
-                this.reposeAPI = new ReposeAPI(this.identityURL, "", "");
+                this.reposeAPI = new ReposeAPI(this.identityURL, this.username, this.apikey);
             }
 
             BluefloodDatasource.prototype.doAPIRequest = function(options) {
-                this.reposeAPI.performReposeAPIRequest();
-
-                if (this.basicAuth || this.withCredentials) {
-                    options.withCredentials = true;
+                this.token    = options.token;
+                this.tenantID = this.token.tenant.id;
+                options.url   = this.url + '/v2.0'+this.tenantID+options.url;
+                options.headers = {
+                    'X-Auth-Token' : this.token.id,
+                    'Content-Type' : 'application/json',
+                    'Accept'       : 'application/json'
                 }
-                if (this.basicAuth) {
-                    options.headers = options.headers || {};
-                    options.headers.Authorization = this.basicAuth;
-                }
-
-                options.url = this.url + options.url;
-                options.inspect = { type: 'blueflood' };
 
                 return $http(options);
             };
@@ -63,15 +59,15 @@ define([
                 return this.events({range: rangeUnparsed, tags: tags})
                     .then(function (results) {
                         var list = [];
-                        for (var i = 0; i < results.data.length; i++) {
-                            var e = results.data[i];
+                        for (var i = 0; i < results.length; i++) {
+                            var e = results[i];
 
                             list.push({
                                 annotation: annotation,
-                                time: e.when,
-                                title: e.what,
-                                tags: e.tags,
-                                text: e.data
+                                time  :  e.when,
+                                title :  e.what,
+                                tags  :  e.tags,
+                                text  :  e.data
                             });
                         }
                         return list;
@@ -85,10 +81,29 @@ define([
                         tags = '&tags=' + options.tags;
                     }
 
-                    return this.doAPIRequest({
+                    this.doAPIRequest({
                         method: 'GET',
-                        url: '/v2.0/836986/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
+                        url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
+                        token: this.reposeAPI.getToken()
+                    }).then(function (response) {
+                        if(response.status === 401){
+                            this.doAPIRequest({
+                                method: 'GET',
+                                url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
+                                token: this.reposeAPI.getIdentity()
+                            }).then(function (response) {
+                                if(response.status/100 === 4 || response.status === 500){
+                                    alert("Error while connecting to Blueflood");
+                                }
+
+                                return response.data;
+                            });
+
+                        }
+                        return response.data;
                     });
+
+                    return [];
                 }
                 catch (err) {
                     return $q.reject(err);

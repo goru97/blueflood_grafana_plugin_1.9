@@ -14,6 +14,7 @@ define([
                 this.url              = api_url;
                 this.username         = username;
                 this.apiKey           = apiKey ;
+                this.getIdentity();
             }
 
             var p = ReposeAPI.prototype;
@@ -22,7 +23,7 @@ define([
              * Get authentication token and check the service catalog to see if user is authorized for metrics query.
              */
 
-            p.performReposeAPIRequest = function(method, params) {
+            p.getIdentity = function() {
                 var options = {
                     method: 'POST',
                     headers: {
@@ -47,9 +48,13 @@ define([
                         return [];
                     }
                    //TODO: Handle Repose Errors
-                    alert(response.data.result);
-                    return response.data.result;
+                    this.authToken = response.data.access.token;
+                    return this.authToken
                 });
+            };
+
+            p.getToken = function() {
+                    return this.authToken;
             };
 
             return ReposeAPI;
