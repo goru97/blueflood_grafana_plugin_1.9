@@ -37,12 +37,11 @@ define([
             }
 
             BluefloodDatasource.prototype.doAPIRequest = function(options, token) {
-                this.tenantID = token.tenant.id;
+                this.token    = token;
+                this.tenantID = this.token.tenant.id;
                 options.url   = this.url + '/v2.0/'+this.tenantID+options.url;
                 options.headers = {
-                    'X-Auth-Token': token.id,
-                    'Accept'      : 'application/json',
-                    'Content-type': 'application/json'
+                    'X-Auth-Token' : this.token.id
                 }
 
                 return $http(options);
@@ -55,25 +54,25 @@ define([
             BluefloodDatasource.prototype.annotationQuery = function (annotation, rangeUnparsed) {
 
                 var tags = templateSrv.replace(annotation.tags);
+                return this.events({range: rangeUnparsed, tags: tags})
+                    .then(function (results) {
+                        var list = [];
+                        for (var i = 0; i < results.length; i++) {
+                            var e = results[i];
 
-                var results = this.events({range: rangeUnparsed, tags: tags});
-
-                var list = [];
-                for (var i = 0; i < results.length; i++) {
-                    var e = results[i];
-                    list.push({
-                        annotation: annotation,
-                        time  :  e.when,
-                        title :  e.what,
-                        tags  :  e.tags,
-                        text  :  e.data
+                            list.push({
+                                annotation: annotation,
+                                time  :  e.when,
+                                title :  e.what,
+                                tags  :  e.tags,
+                                text  :  e.data
+                            });
+                        }
+                        return list;
                     });
-                }
-                return list;
-
             };
 
-            BluefloodDatasource.prototype.events = function (options) {
+             BluefloodDatasource.prototype.events = function (options) {
                 try {
                     var tags = '';
                     if (options.tags) {
@@ -93,11 +92,11 @@ define([
                                     alert("Error while connecting to Blueflood");
                                 }
 
-                                return response.data;
+                                return response;
                             });
 
                         }
-                        return response.data;
+                        return response;
                     });
 
                     return [];
@@ -108,9 +107,9 @@ define([
             };
 
             BluefloodDatasource.prototype.translateTime = function(date) {
-                return kbn.parseDate(date).getTime();
+              return kbn.parseDate(date).getTime();
             };
 
-            return BluefloodDatasource;
+        return BluefloodDatasource;
         });
     });
