@@ -36,14 +36,13 @@ define([
                 this.reposeAPI = new ReposeAPI(this.identityURL, this.username, this.apikey);
             }
 
-            BluefloodDatasource.prototype.doAPIRequest = function(options) {
-                this.token    = options.token;
-                this.tenantID = this.token.tenant.id;
-                options.url   = this.url + '/v2.0'+this.tenantID+options.url;
+            BluefloodDatasource.prototype.doAPIRequest = function(options, token) {
+                this.tenantID = token.tenant.id;
+                options.url   = this.url + '/v2.0/'+this.tenantID+options.url;
                 options.headers = {
-                    'X-Auth-Token' : this.token.id,
-                    'Content-Type' : 'application/json',
-                    'Accept'       : 'application/json'
+                    'X-Auth-Token': token.id,
+                    'Accept'      : 'application/json',
+                    'Content-type': 'application/json'
                 }
 
                 return $http(options);
@@ -56,25 +55,25 @@ define([
             BluefloodDatasource.prototype.annotationQuery = function (annotation, rangeUnparsed) {
 
                 var tags = templateSrv.replace(annotation.tags);
-                return this.events({range: rangeUnparsed, tags: tags})
-                    .then(function (results) {
-                        var list = [];
-                        for (var i = 0; i < results.length; i++) {
-                            var e = results[i];
 
-                            list.push({
-                                annotation: annotation,
-                                time  :  e.when,
-                                title :  e.what,
-                                tags  :  e.tags,
-                                text  :  e.data
-                            });
-                        }
-                        return list;
+                var results = this.events({range: rangeUnparsed, tags: tags});
+
+                var list = [];
+                for (var i = 0; i < results.length; i++) {
+                    var e = results[i];
+                    list.push({
+                        annotation: annotation,
+                        time  :  e.when,
+                        title :  e.what,
+                        tags  :  e.tags,
+                        text  :  e.data
                     });
+                }
+                return list;
+
             };
 
-             BluefloodDatasource.prototype.events = function (options) {
+            BluefloodDatasource.prototype.events = function (options) {
                 try {
                     var tags = '';
                     if (options.tags) {
@@ -83,15 +82,13 @@ define([
 
                     this.doAPIRequest({
                         method: 'GET',
-                        url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
-                        token: this.reposeAPI.getToken()
-                    }).then(function (response) {
+                        url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags
+                    }, this.reposeAPI.getToken()).then(function (response) {
                         if(response.status === 401){
                             this.doAPIRequest({
                                 method: 'GET',
-                                url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
-                                token: this.reposeAPI.getIdentity()
-                            }).then(function (response) {
+                                url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags
+                            }, this.reposeAPI.getIdentity()).then(function (response) {
                                 if(response.status/100 === 4 || response.status === 500){
                                     alert("Error while connecting to Blueflood");
                                 }
@@ -111,9 +108,9 @@ define([
             };
 
             BluefloodDatasource.prototype.translateTime = function(date) {
-              return kbn.parseDate(date).getTime();
+                return kbn.parseDate(date).getTime();
             };
 
-        return BluefloodDatasource;
+            return BluefloodDatasource;
         });
     });

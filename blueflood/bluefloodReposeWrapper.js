@@ -48,13 +48,17 @@ define([
                         return [];
                     }
                    //TODO: Handle Repose Errors
-                    this.authToken = response.data.access.token;
-                    return this.authToken
+                    p.setToken(response.data.access.token);
+                    return p.getToken();
                 });
             };
 
             p.getToken = function() {
                     return this.authToken;
+            };
+
+            p.setToken = function(token){
+                this.authToken = token;
             };
 
             return ReposeAPI;
