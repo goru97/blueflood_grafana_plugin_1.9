@@ -37,11 +37,11 @@ define([
             }
 
             BluefloodDatasource.prototype.doAPIRequest = function(options, token) {
-                this.token    = token;
-                this.tenantID = this.token.tenant.id;
-                options.url   = this.url + '/v2.0/'+this.tenantID+options.url;
+                var tokenID = token.id
+                var tenantID = token.tenant.id;
+                options.url   = this.url + '/v2.0/'+tenantID+options.url;
                 options.headers = {
-                    'X-Auth-Token' : this.token.id
+                    'X-Auth-Token' : tokenID
                 }
 
                 return $http(options);
