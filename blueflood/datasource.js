@@ -44,7 +44,7 @@ define([
                     'X-Auth-Token' : tokenID
                 }
 
-                return $http(options);
+                return $http.get(options.url, options);
             };
 
             /////////////////
