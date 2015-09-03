@@ -57,8 +57,8 @@ define([
                 return this.events({range: rangeUnparsed, tags: tags})
                     .then(function (results) {
                         var list = [];
-                        for (var i = 0; i < results.length; i++) {
-                            var e = results[i];
+                        for (var i = 0; i < results.data.length; i++) {
+                            var e = results.data[i];
 
                             list.push({
                                 annotation: annotation,
