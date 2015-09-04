@@ -8,6 +8,8 @@ Then edit Grafana config.js
 plugins: { </br>
   panels: [],</br>
   dependencies: ['datasource/blueflood/datasource'],</br>
+  username: '...',</br>
+  apikey: '...'</br>
 }</br>
 
 ###Add datasource and setup your Blueflood url</br>
