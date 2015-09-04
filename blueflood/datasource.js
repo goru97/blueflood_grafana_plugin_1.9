@@ -6,7 +6,6 @@ define([
         './bluefloodReposeWrapper'
     ],
     function (angular, _, kbn) {
-        //'use strict';
 
         var module = angular.module('grafana.services');
 
@@ -47,9 +46,10 @@ define([
                 return $http.get(options.url, options);
             };
 
-            /////////////////
-            // Annotations //
-            /////////////////
+              /********************/
+             /*** Annotations ****/
+            /********************/
+
 
             BluefloodDatasource.prototype.annotationQuery = function (annotation, rangeUnparsed) {
 
@@ -84,30 +84,31 @@ define([
                         method: 'GET',
                         url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags
                     }, this.reposeAPI.getToken()).then(function (response) {
+                        var tokenExpired = false;
                         if(response.status === 401){
-                            this.doAPIRequest({
-                                method: 'GET',
-                                url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags
-                            }, this.reposeAPI.getIdentity()).then(function (response) {
-                                if(response.status/100 === 4 || response.status === 500){
-                                    alert("Error while connecting to Blueflood");
-                                }
-                                var d = $q.defer();
-                                d.resolve(response);
-                                return d.promise;
-                            });
-
+                            tokenExpired = true;
+                            var retryCount = 0;
+                            var retryRequest = setInterval(function() {
+                                this.doAPIRequest({
+                                    method: 'GET',
+                                    url: '/events/getEvents?from=' + this.translateTime(options.range.from) + '&until=' + this.translateTime(options.range.to) + tags
+                                }, this.reposeAPI.getIdentity()).then(function (response) {
+                                    retryCount++;
+                                    if (response.status === 200 || retryCount === 5) {
+                                        clearInterval(retryRequest)
+                                        var d = $q.defer();
+                                        d.resolve(response);
+                                        return d.promise;
+                                    }
+                                });
+                            },1000);
+                            }
+                        if(!tokenExpired) {
+                            var d = $q.defer();
+                            d.resolve(response);
+                            return d.promise;
                         }
-                        var d = $q.defer();
-                        d.resolve(response);
-                        return d.promise;
                     });
-
-
-                    return this.doAPIRequest({
-                        method: 'GET',
-                        url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags
-                    }, this.reposeAPI.getToken());
                 }
                 catch (err) {
                     return $q.reject(err);
