@@ -7,9 +7,7 @@ Then edit Grafana config.js
 
 plugins: { </br>
   panels: [],</br>
-  dependencies: ['datasource/blueflood/datasource'],</br>
-  username: '...',</br>
-  apikey: '...'</br>
+  dependencies: ['datasource/blueflood/datasource']</br>
 }</br>
 
 ###Add datasource and setup your Blueflood url</br>
@@ -18,6 +16,8 @@ datasources: {</br>
   ...</br>
   blueflood: {</br>
     type: 'BluefloodDatasource',</br>
-    url: 'http://staging.metrics.api.rackspacecloud.com'</br>
+    url: 'http://staging.metrics.api.rackspacecloud.com',</br>
+    username: <UserName>,</br>
+    apikey: <APIKey></br>
   }</br>
   },</br>
