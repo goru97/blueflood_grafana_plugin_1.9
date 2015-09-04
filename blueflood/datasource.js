@@ -79,6 +79,33 @@ define([
                         tags = '&tags=' + options.tags;
                     }
 
+
+                    this.doAPIRequest({
+                        method: 'GET',
+                        url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
+                        token: this.reposeAPI.getToken()
+                    }).then(function (response) {
+                        if(response.status === 401){
+                            this.doAPIRequest({
+                                method: 'GET',
+                                url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags,
+                                token: this.reposeAPI.getIdentity()
+                            }).then(function (response) {
+                                if(response.status/100 === 4 || response.status === 500){
+                                    alert("Error while connecting to Blueflood");
+                                }
+                                var d = $q.defer();
+                                d.resolve(response);
+                                return d.promise;
+                            });
+
+                        }
+                        var d = $q.defer();
+                        d.resolve(response);
+                        return d.promise;
+                    });
+
+
                     return this.doAPIRequest({
                         method: 'GET',
                         url: '/events/getEvents?from=' +this.translateTime(options.range.from)+ '&until=' +this.translateTime(options.range.to) + tags
